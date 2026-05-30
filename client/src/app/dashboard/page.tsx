@@ -11,6 +11,13 @@ export default function DashboardPage() {
   const router = useRouter();
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [loading, setLoading] = useState(true);
+  const [greeting, setGreeting] = useState("Good morning");
+
+  useEffect(() => {
+    const h = new Date().getHours();
+    if (h >= 12 && h < 17) setGreeting("Good afternoon");
+    else if (h >= 17) setGreeting("Good evening");
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
@@ -19,99 +26,116 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       api.get<{ roadmap: Roadmap }>("/api/roadmap")
-        .then((d) => setRoadmap(d.roadmap))
+        .then(d => setRoadmap(d.roadmap))
         .catch(() => setRoadmap(null))
         .finally(() => setLoading(false));
     }
   }, [user]);
 
-  if (authLoading || loading) {
-    return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" /></div>;
-  }
+  if (authLoading || loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
   if (!user) return null;
 
-  const completed = roadmap?.skills.filter((s) => s.status === "completed").length || 0;
+  const completed = roadmap?.skills.filter(s => s.status === "completed").length || 0;
+  const inProgress = roadmap?.skills.filter(s => s.status === "inProgress").length || 0;
   const total = roadmap?.skills.length || 0;
   const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const missing = roadmap?.skills.filter((s) => s.status === "missing").length || 0;
+  const missing = roadmap?.skills.filter(s => s.status === "missing").length || 0;
 
   const features = [
-    { href: "/roadmap",        icon: "🗺️", title: "View Roadmap",      desc: "Track and toggle skill progress" },
-    { href: "/chat",           icon: "🤖", title: "AI Mentor Chat",     desc: "Ask doubts, get guidance" },
-    { href: "/interview",      icon: "💼", title: "Interview Prep",     desc: "DSA, technical & HR questions" },
-    { href: "/mock-interview", icon: "🎤", title: "Mock Interview",     desc: "Simulate a real tech interview" },
-    { href: "/resume",         icon: "📄", title: "Resume Builder",     desc: "Build and download your resume" },
-    { href: "/planner",        icon: "📅", title: "Weekly Planner",     desc: "Auto-generate study schedule" },
-    { href: "/badges",         icon: "🏅", title: "Badges",             desc: "View your achievements" },
-    { href: "/github",         icon: "🐙", title: "GitHub Analyzer",    desc: "Analyze any GitHub profile" },
+    { href: "/roadmap",        icon: "🗺️", title: "Skill Roadmap",      desc: "Track and toggle skill progress",       color: "rgba(99,102,241,0.15)" },
+    { href: "/chat",           icon: "🤖", title: "AI Mentor Chat",      desc: "Ask doubts, get career guidance",       color: "rgba(139,92,246,0.15)" },
+    { href: "/interview",      icon: "💼", title: "Interview Prep",      desc: "DSA, technical & HR questions",         color: "rgba(6,182,212,0.15)" },
+    { href: "/mock-interview", icon: "🎤", title: "Mock Interview",      desc: "Timed interview with scoring",          color: "rgba(234,179,8,0.15)" },
+    { href: "/resume",         icon: "📄", title: "Resume Builder",      desc: "3 professional templates + PDF",        color: "rgba(34,197,94,0.15)" },
+    { href: "/planner",        icon: "📅", title: "Weekly Planner",      desc: "Auto-generate study schedule",          color: "rgba(249,115,22,0.15)" },
+    { href: "/badges",         icon: "🏅", title: "Badges & XP",         desc: "View your achievements",               color: "rgba(236,72,153,0.15)" },
+    { href: "/github",         icon: "🐙", title: "GitHub Analyzer",     desc: "Analyze any GitHub profile",           color: "rgba(51,65,85,0.4)" },
   ];
 
   return (
     <div className="min-h-screen">
       {/* Navbar */}
-      <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <span className="font-bold text-xl gradient-text">SkillSync AI</span>
+      <nav className="navbar">
+        <span className="font-bold text-lg gradient-text">SkillSync AI</span>
         <div className="flex items-center gap-5">
-          <Link href="/roadmap"        className="text-slate-400 hover:text-white text-sm transition-colors">Roadmap</Link>
-          <Link href="/chat"           className="text-slate-400 hover:text-white text-sm transition-colors">AI Chat</Link>
-          <Link href="/interview"      className="text-slate-400 hover:text-white text-sm transition-colors">Interview</Link>
-          <Link href="/mock-interview" className="text-slate-400 hover:text-white text-sm transition-colors">Mock</Link>
-          <Link href="/resume"         className="text-slate-400 hover:text-white text-sm transition-colors">Resume</Link>
-          <Link href="/settings"       className="text-slate-400 hover:text-white text-sm transition-colors" title="Settings">⚙️</Link>
-          <button onClick={logout}     className="text-slate-400 hover:text-red-400 text-sm transition-colors">Logout</button>
+          <Link href="/roadmap"   className="nav-link">Roadmap</Link>
+          <Link href="/chat"      className="nav-link">AI Chat</Link>
+          <Link href="/interview" className="nav-link">Interview</Link>
+          <Link href="/settings"  className="nav-link">⚙️</Link>
+          <button onClick={logout} className="nav-link hover:text-red-400 transition-colors">Logout</button>
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Welcome header */}
+        <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-1">Welcome back, {user.name.split(" ")[0]} 👋</h1>
-            <p className="text-slate-400 text-sm">Target role: <span className="text-indigo-400 font-medium">{user.goalRole || "Not set"}</span></p>
+            <p className="text-sm mb-1" style={{ color: "var(--text-muted)" }}>{greeting}</p>
+            <h1 className="text-3xl font-bold">{user.name.split(" ")[0]} 👋</h1>
+            <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+              Working toward <span className="text-indigo-400 font-medium">{user.goalRole || "your goal"}</span>
+            </p>
           </div>
-          <Link href="/onboarding" className="btn-ghost text-sm px-4 py-2">🔄 New Roadmap</Link>
+          <Link href="/settings" className="btn-ghost text-sm px-4 py-2">⚙️ Settings</Link>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {[
-            { label: "XP Earned",   value: user.xp,               icon: "⚡", color: "text-yellow-400" },
-            { label: "Day Streak",  value: `${user.streak} days`,  icon: "🔥", color: "text-orange-400" },
-            { label: "Skills Done", value: `${completed}/${total}`, icon: "✅", color: "text-green-400" },
-            { label: "Skills Left", value: missing,                icon: "📚", color: "text-indigo-400" },
-          ].map((stat) => (
-            <div key={stat.label} className="card text-center">
-              <div className="text-2xl mb-1">{stat.icon}</div>
-              <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
-              <div className="text-slate-400 text-xs mt-1">{stat.label}</div>
+            { label: "XP Earned",    value: user.xp,              icon: "⚡", color: "#eab308", bg: "rgba(234,179,8,0.1)",  border: "rgba(234,179,8,0.2)" },
+            { label: "Day Streak",   value: `${user.streak}d`,    icon: "🔥", color: "#f97316", bg: "rgba(249,115,22,0.1)", border: "rgba(249,115,22,0.2)" },
+            { label: "Completed",    value: `${completed}/${total}`, icon: "✅", color: "#22c55e", bg: "rgba(34,197,94,0.1)",  border: "rgba(34,197,94,0.2)" },
+            { label: "In Progress",  value: inProgress,           icon: "🔄", color: "#6366f1", bg: "rgba(99,102,241,0.1)", border: "rgba(99,102,241,0.2)" },
+          ].map(s => (
+            <div key={s.label} className="card text-center" style={{ borderColor: s.border, background: s.bg }}>
+              <div className="text-2xl mb-2">{s.icon}</div>
+              <div className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>
+              <div className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Progress */}
         {roadmap && (
-          <div className="card mb-8">
+          <div className="card mb-6">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="font-semibold">Overall Progress — {roadmap.goalRole}</h2>
-              <span className="text-indigo-400 font-bold text-lg">{percent}%</span>
+              <div>
+                <h2 className="font-semibold text-sm">{roadmap.goalRole} — Overall Progress</h2>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{completed} of {total} skills completed · {missing} remaining</p>
+              </div>
+              <div className="text-2xl font-bold gradient-text">{percent}%</div>
             </div>
-            <div className="w-full bg-white/10 rounded-full h-3">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-700"
-                style={{ width: `${percent}%` }} />
+            <div className="progress-bar h-2.5">
+              <div className="progress-fill h-2.5" style={{ width: `${percent}%` }} />
             </div>
-            <p className="text-slate-500 text-xs mt-2">{completed} of {total} skills completed</p>
+            {percent < 100 && (
+              <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
+                {percent === 0 ? "🌱 Start by marking skills on your Roadmap page" :
+                 percent < 30 ? "🚀 Great start! Keep the momentum going" :
+                 percent < 70 ? "💪 Past the halfway mark! You're doing great" :
+                 "🔥 Almost there! Finish strong"}
+              </p>
+            )}
           </div>
         )}
 
-        {/* Features */}
-        <h2 className="text-lg font-bold mb-4 text-slate-300">All Features</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
-          {features.map((f) => (
-            <Link key={f.href} href={f.href}
-              className="card hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all duration-200 group cursor-pointer p-4">
-              <div className="text-2xl mb-2">{f.icon}</div>
-              <h3 className="font-semibold text-sm mb-0.5 group-hover:text-indigo-400 transition-colors">{f.title}</h3>
-              <p className="text-slate-500 text-xs leading-relaxed">{f.desc}</p>
+        {/* Features grid */}
+        <div className="mb-2">
+          <p className="section-title">All Features</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {features.map(f => (
+            <Link key={f.href} href={f.href} className="feature-card group">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 transition-transform group-hover:scale-110"
+                style={{ background: f.color }}>
+                {f.icon}
+              </div>
+              <h3 className="font-semibold text-xs mb-1">{f.title}</h3>
+              <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>{f.desc}</p>
             </Link>
           ))}
         </div>
@@ -119,21 +143,23 @@ export default function DashboardPage() {
         {/* Suggested Projects */}
         {roadmap && roadmap.projects.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold mb-4 text-slate-300">Suggested Projects</h2>
+            <p className="section-title">Suggested Projects</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {roadmap.projects.map((project, i) => (
-                <div key={i} className="card">
-                  <div className={`text-xs font-medium px-2.5 py-1 rounded-full inline-block mb-3 ${
-                    project.difficulty === "Beginner"     ? "bg-green-500/15 text-green-400"  :
-                    project.difficulty === "Intermediate" ? "bg-yellow-500/15 text-yellow-400" :
-                                                           "bg-red-500/15 text-red-400"}`}>
-                    {project.difficulty}
+                <div key={i} className="card card-hover">
+                  <div className={`pill mb-3 ${
+                    project.difficulty === "Beginner" ? "pill-green" :
+                    project.difficulty === "Intermediate" ? "pill-yellow" : "pill-red"
+                  }`}>
+                    {project.difficulty === "Beginner" ? "🟢" : project.difficulty === "Intermediate" ? "🟡" : "🔴"} {project.difficulty}
                   </div>
-                  <h3 className="font-semibold mb-2 text-sm">{project.title}</h3>
-                  <p className="text-slate-400 text-xs mb-3 leading-relaxed">{project.description}</p>
-                  <div className="flex flex-wrap gap-1">
-                    {project.techStack?.map((tech) => (
-                      <span key={tech} className="text-xs bg-white/5 border border-white/10 rounded-lg px-2 py-0.5 text-slate-400">{tech}</span>
+                  <h3 className="font-semibold text-sm mb-2">{project.title}</h3>
+                  <p className="text-xs mb-3 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{project.description}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.techStack?.map(tech => (
+                      <span key={tech} className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+                        {tech}
+                      </span>
                     ))}
                   </div>
                 </div>

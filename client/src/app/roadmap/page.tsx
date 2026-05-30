@@ -6,11 +6,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { Roadmap, SkillNode } from "@/types";
 
-const STATUS_CONFIG = {
-  completed: { label: "Completed ✅", color: "bg-green-500/20 text-green-400 border-green-500/30", dot: "bg-green-400" },
-  inProgress: { label: "In Progress", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", dot: "bg-yellow-400" },
-  missing: { label: "Not Started", color: "bg-slate-500/20 text-slate-400 border-slate-500/30", dot: "bg-slate-500" },
+const STATUS = {
+  completed: { label: "Completed",   dot: "#22c55e", bg: "rgba(34,197,94,0.1)",   border: "rgba(34,197,94,0.25)",   text: "#86efac" },
+  inProgress: { label: "In Progress", dot: "#eab308", bg: "rgba(234,179,8,0.1)",   border: "rgba(234,179,8,0.25)",   text: "#fde047" },
+  missing:    { label: "Not Started", dot: "#475569", bg: "rgba(71,85,105,0.1)",   border: "rgba(71,85,105,0.2)",    text: "#94a3b8" },
 };
+
+const nextStatus = (s: SkillNode["status"]): SkillNode["status"] =>
+  s === "missing" ? "inProgress" : s === "inProgress" ? "completed" : "missing";
 
 export default function RoadmapPage() {
   const { user, loading: authLoading } = useAuth();
@@ -18,6 +21,7 @@ export default function RoadmapPage() {
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "missing" | "inProgress" | "completed">("all");
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
@@ -26,18 +30,18 @@ export default function RoadmapPage() {
   useEffect(() => {
     if (user) {
       api.get<{ roadmap: Roadmap }>("/api/roadmap")
-        .then((d) => setRoadmap(d.roadmap))
+        .then(d => setRoadmap(d.roadmap))
         .finally(() => setLoading(false));
     }
   }, [user]);
 
-  const handleStart = async (skill: SkillNode) => {
-    if (skill.status !== "missing") return;
+  const handleToggle = async (skill: SkillNode) => {
+    if (!roadmap || updating) return;
     setUpdating(skill.skillName);
     try {
       const data = await api.put<{ roadmap: Roadmap }>(
         `/api/roadmap/skill/${encodeURIComponent(skill.skillName)}`,
-        { status: "inProgress" }
+        { status: nextStatus(skill.status) }
       );
       setRoadmap(data.roadmap);
     } catch (err) { console.error(err); }
@@ -52,100 +56,119 @@ export default function RoadmapPage() {
 
   if (!roadmap) return (
     <div className="min-h-screen flex items-center justify-center text-center">
-      <div><p className="text-slate-400 mb-4">No roadmap found.</p>
-      <Link href="/onboarding" className="btn-primary">Generate Roadmap</Link></div>
+      <div>
+        <div className="text-5xl mb-4">🗺️</div>
+        <p className="mb-4" style={{ color: "var(--text-secondary)" }}>No roadmap found.</p>
+        <Link href="/onboarding" className="btn-primary">Generate Roadmap</Link>
+      </div>
     </div>
   );
 
-  const completed = roadmap.skills.filter((s) => s.status === "completed").length;
+  const completed = roadmap.skills.filter(s => s.status === "completed").length;
   const percent = Math.round((completed / roadmap.skills.length) * 100);
+  const filtered = filter === "all" ? roadmap.skills : roadmap.skills.filter(s => s.status === filter);
 
   return (
     <div className="min-h-screen">
-      <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <Link href="/dashboard" className="font-bold text-xl gradient-text">SkillSync AI</Link>
-        <div className="flex items-center gap-6">
-          <Link href="/chat" className="text-slate-400 hover:text-white text-sm">AI Chat</Link>
-          <Link href="/dashboard" className="text-slate-400 hover:text-white text-sm">Dashboard</Link>
+      <nav className="navbar">
+        <Link href="/dashboard" className="font-bold text-lg gradient-text">SkillSync AI</Link>
+        <div className="flex items-center gap-5">
+          <Link href="/chat"      className="nav-link">AI Chat</Link>
+          <Link href="/interview" className="nav-link">Interview</Link>
+          <Link href="/dashboard" className="nav-link">Dashboard</Link>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-1">{roadmap.goalRole} Roadmap</h1>
-          <p className="text-slate-400">{completed}/{roadmap.skills.length} skills verified</p>
-          <div className="mt-4 w-full bg-white/10 rounded-full h-2">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-700"
-              style={{ width: `${percent}%` }} />
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold mb-1">{roadmap.goalRole}</h1>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              {completed} of {roadmap.skills.length} skills completed
+            </p>
           </div>
+          <div className="text-3xl font-bold gradient-text">{percent}%</div>
         </div>
 
-        <div className="card bg-indigo-500/5 border-indigo-500/20 mb-6 text-sm text-slate-400">
-          <span className="text-indigo-400 font-medium">How it works: </span>
-          Click <strong>Start</strong> to begin a skill → Take the <strong>📝 Quiz</strong> → Score 60%+ to earn <span className="text-green-400">Completed ✅</span> and <span className="text-yellow-400">+10 XP</span>
+        {/* Progress */}
+        <div className="progress-bar h-2 mb-8">
+          <div className="progress-fill h-2" style={{ width: `${percent}%` }} />
         </div>
 
-        <div className="flex gap-6 mb-6 text-sm flex-wrap">
-          {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-            <div key={key} className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-              <span className="text-slate-400">{cfg.label}</span>
-            </div>
+        {/* Filter tabs */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {(["all", "missing", "inProgress", "completed"] as const).map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className="px-4 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 border"
+              style={filter === f ? {
+                background: "rgba(99,102,241,0.2)", borderColor: "rgba(99,102,241,0.5)", color: "#a5b4fc"
+              } : {
+                background: "rgba(255,255,255,0.04)", borderColor: "var(--border)", color: "var(--text-muted)"
+              }}>
+              {f === "all" ? `All (${roadmap.skills.length})` :
+               f === "completed" ? `✅ Completed (${roadmap.skills.filter(s => s.status === "completed").length})` :
+               f === "inProgress" ? `🔄 In Progress (${roadmap.skills.filter(s => s.status === "inProgress").length})` :
+               `📚 Not Started (${roadmap.skills.filter(s => s.status === "missing").length})`}
+            </button>
           ))}
+          <span className="ml-auto text-xs self-center" style={{ color: "var(--text-muted)" }}>
+            Click any card to update status
+          </span>
         </div>
 
+        {/* Skills grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {roadmap.skills.map((skill, i) => {
-            const cfg = STATUS_CONFIG[skill.status];
+          {filtered.map((skill, i) => {
+            const cfg = STATUS[skill.status];
             const isUpdating = updating === skill.skillName;
             return (
-              <div key={skill.skillName}
-                className={`card transition-all duration-200 ${isUpdating ? "opacity-50" : ""} ${
-                  skill.status === "completed" ? "border-green-500/20" :
-                  skill.status === "inProgress" ? "border-yellow-500/20" : ""}`}>
-                <div className="flex items-start justify-between gap-3 mb-4">
+              <button key={skill.skillName} onClick={() => handleToggle(skill)} disabled={!!isUpdating}
+                className="card text-left transition-all duration-200 group"
+                style={{ borderColor: isUpdating ? "rgba(99,102,241,0.4)" : "var(--border)", cursor: isUpdating ? "wait" : "pointer" }}
+                onMouseEnter={e => { if (!isUpdating) (e.currentTarget as HTMLElement).style.borderColor = "rgba(99,102,241,0.3)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}>
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-slate-500 text-xs font-mono">{String(i + 1).padStart(2, "0")}</span>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+                        {String(roadmap.skills.indexOf(skill) + 1).padStart(2, "0")}
+                      </span>
                       <h3 className="font-semibold text-sm">{skill.skillName}</h3>
                     </div>
-                    <div className="flex items-center gap-2 ml-6">
-                      <span className={`text-xs px-2 py-0.5 rounded-full border ${cfg.color}`}>{cfg.label}</span>
-                      <span className="text-slate-500 text-xs">~{skill.estimatedWeeks}w</span>
+                    <div className="flex items-center gap-2 ml-7">
+                      <span className="pill text-xs" style={{ background: cfg.bg, color: cfg.text, borderColor: cfg.border }}>
+                        {cfg.label}
+                      </span>
+                      <span className="text-xs" style={{ color: "var(--text-muted)" }}>~{skill.estimatedWeeks}w</span>
                     </div>
                   </div>
-                  <div className={`w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0 ${cfg.dot}`} />
+                  <div className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" style={{ background: cfg.dot }} />
                 </div>
-
-                <div className="flex gap-2 ml-6">
-                  {skill.status === "missing" && (
-                    <button onClick={() => handleStart(skill)} disabled={isUpdating}
-                      className="text-xs px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg hover:border-white/30 transition-all">
-                      ▶ Start
-                    </button>
-                  )}
-                  {skill.status === "completed" ? (
-                    <span className="text-xs px-3 py-1.5 bg-green-500/10 border border-green-500/20 text-green-400 rounded-lg">
-                      ✅ Verified via Quiz
-                    </span>
-                  ) : (
-                    <Link href={`/quiz/${encodeURIComponent(skill.skillName)}`}
-                      className="text-xs px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 rounded-lg hover:bg-indigo-500/20 transition-all">
-                      📝 Take Quiz to Complete
-                    </Link>
-                  )}
-                </div>
-
-                {skill.resources && skill.resources.length > 0 && (
-                  <div className="mt-3 ml-6">
+                {skill.resources?.length > 0 && (
+                  <div className="mt-3 ml-7 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+                    <p className="text-xs mb-1.5" style={{ color: "var(--text-muted)" }}>Resources</p>
                     {skill.resources.slice(0, 2).map((r, ri) => (
                       <p key={ri} className="text-xs text-indigo-400 truncate">• {r}</p>
                     ))}
                   </div>
                 )}
-              </div>
+              </button>
             );
           })}
+        </div>
+
+        {filtered.length === 0 && (
+          <div className="card text-center py-12">
+            <p className="text-2xl mb-2">🎉</p>
+            <p style={{ color: "var(--text-secondary)" }}>No skills in this category</p>
+          </div>
+        )}
+
+        <div className="card mt-6 py-3" style={{ background: "rgba(99,102,241,0.05)", borderColor: "rgba(99,102,241,0.2)" }}>
+          <p className="text-xs text-center" style={{ color: "var(--text-secondary)" }}>
+            <span className="text-indigo-400 font-medium">Tip:</span> Click any skill → Not Started → In Progress → Completed. Each completion earns <span className="text-yellow-400 font-medium">+10 XP</span>
+          </p>
         </div>
       </div>
     </div>
