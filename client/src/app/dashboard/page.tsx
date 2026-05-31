@@ -6,166 +6,163 @@ import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/api";
 import { Roadmap } from "@/types";
 
+const NAV_LINKS = [
+  { href: "/roadmap", label: "Roadmap" },
+  { href: "/chat", label: "AI Chat" },
+  { href: "/interview", label: "Interview" },
+  { href: "/analytics", label: "Analytics" },
+];
+
+const FEATURES = [
+  { href: "/roadmap",        icon: "🗺️", title: "View Roadmap",      desc: "Track and verify skills" },
+  { href: "/chat",           icon: "🤖", title: "AI Mentor Chat",     desc: "Ask doubts, get guidance" },
+  { href: "/interview",      icon: "💼", title: "Interview Prep",     desc: "DSA, technical & HR" },
+  { href: "/mock-interview", icon: "🎤", title: "Mock Interview",     desc: "Simulate real interview" },
+  { href: "/analytics",      icon: "📊", title: "Analytics",          desc: "Progress charts & XP" },
+  { href: "/studyplan",      icon: "📅", title: "Study Plan",         desc: "AI day-by-day schedule" },
+  { href: "/jobmatch",       icon: "🎯", title: "Job Match",          desc: "Compare skills vs JD" },
+  { href: "/codereview",     icon: "🔍", title: "Code Review",        desc: "AI code feedback" },
+  { href: "/leaderboard",    icon: "🏆", title: "Leaderboard",        desc: "XP rankings" },
+  { href: "/resume",         icon: "📄", title: "Resume Builder",     desc: "Download PDF resume" },
+  { href: "/github",         icon: "🐙", title: "GitHub Analyzer",    desc: "Analyze any profile" },
+  { href: "/badges",         icon: "🏅", title: "Badges",             desc: "View achievements" },
+];
+
 export default function DashboardPage() {
   const { user, logout, loading: authLoading } = useAuth();
   const router = useRouter();
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [loading, setLoading] = useState(true);
-  const [greeting, setGreeting] = useState("Good morning");
 
-  useEffect(() => {
-    const h = new Date().getHours();
-    if (h >= 12 && h < 17) setGreeting("Good afternoon");
-    else if (h >= 17) setGreeting("Good evening");
-  }, []);
-
-  useEffect(() => {
-    if (!authLoading && !user) router.push("/login");
-  }, [user, authLoading, router]);
-
+  useEffect(() => { if (!authLoading && !user) router.push("/login"); }, [user, authLoading, router]);
   useEffect(() => {
     if (user) {
       api.get<{ roadmap: Roadmap }>("/api/roadmap")
-        .then(d => setRoadmap(d.roadmap))
-        .catch(() => setRoadmap(null))
-        .finally(() => setLoading(false));
+        .then(d => setRoadmap(d.roadmap)).catch(() => setRoadmap(null)).finally(() => setLoading(false));
     }
   }, [user]);
 
   if (authLoading || loading) return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <div className="spinner" />
     </div>
   );
   if (!user) return null;
 
   const completed = roadmap?.skills.filter(s => s.status === "completed").length || 0;
-  const inProgress = roadmap?.skills.filter(s => s.status === "inProgress").length || 0;
   const total = roadmap?.skills.length || 0;
   const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
   const missing = roadmap?.skills.filter(s => s.status === "missing").length || 0;
 
-  const features = [
-    { href: "/roadmap",        icon: "🗺️", title: "Skill Roadmap",      desc: "Track and toggle skill progress",       color: "rgba(99,102,241,0.15)" },
-    { href: "/chat",           icon: "🤖", title: "AI Mentor Chat",      desc: "Ask doubts, get career guidance",       color: "rgba(139,92,246,0.15)" },
-    { href: "/interview",      icon: "💼", title: "Interview Prep",      desc: "DSA, technical & HR questions",         color: "rgba(6,182,212,0.15)" },
-    { href: "/mock-interview", icon: "🎤", title: "Mock Interview",      desc: "Timed interview with scoring",          color: "rgba(234,179,8,0.15)" },
-    { href: "/resume",         icon: "📄", title: "Resume Builder",      desc: "3 professional templates + PDF",        color: "rgba(34,197,94,0.15)" },
-    { href: "/planner",        icon: "📅", title: "Weekly Planner",      desc: "Auto-generate study schedule",          color: "rgba(249,115,22,0.15)" },
-    { href: "/badges",         icon: "🏅", title: "Badges & XP",         desc: "View your achievements",               color: "rgba(236,72,153,0.15)" },
-    { href: "/github",         icon: "🐙", title: "GitHub Analyzer",     desc: "Analyze any GitHub profile",           color: "rgba(51,65,85,0.4)" },
-  ];
-
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
       {/* Navbar */}
       <nav className="navbar">
-        <span className="font-bold text-lg gradient-text">SkillSync AI</span>
-        <div className="flex items-center gap-5">
-          <Link href="/roadmap"   className="nav-link">Roadmap</Link>
-          <Link href="/chat"      className="nav-link">AI Chat</Link>
-          <Link href="/interview" className="nav-link">Interview</Link>
-          <Link href="/settings"  className="nav-link">⚙️</Link>
-          <button onClick={logout} className="nav-link hover:text-red-400 transition-colors">Logout</button>
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ width: "26px", height: "26px", borderRadius: "7px", background: "linear-gradient(135deg, #6366f1, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "700", color: "white" }}>S</div>
+            <span style={{ fontWeight: "700", fontSize: "14px", color: "var(--text-primary)" }}>SkillSync AI</span>
+          </div>
+          <div style={{ display: "flex", gap: "2px" }}>
+            {NAV_LINKS.map(l => (
+              <Link key={l.href} href={l.href} style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "13px", color: "var(--text-secondary)", textDecoration: "none", transition: "all 0.15s" }}
+                onMouseEnter={e => { (e.target as HTMLElement).style.color = "var(--text-primary)"; (e.target as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+                onMouseLeave={e => { (e.target as HTMLElement).style.color = "var(--text-secondary)"; (e.target as HTMLElement).style.background = "transparent"; }}>
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <Link href="/settings" style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "13px", color: "var(--text-secondary)", textDecoration: "none" }}>Settings</Link>
+          <button onClick={logout} className="btn-ghost" style={{ fontSize: "12px", padding: "5px 12px" }}>Logout</button>
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Welcome header */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <p className="text-sm mb-1" style={{ color: "var(--text-muted)" }}>{greeting}</p>
-            <h1 className="text-3xl font-bold">{user.name.split(" ")[0]} 👋</h1>
-            <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-              Working toward <span className="text-indigo-400 font-medium">{user.goalRole || "your goal"}</span>
-            </p>
-          </div>
-          <Link href="/settings" className="btn-ghost text-sm px-4 py-2">⚙️ Settings</Link>
+      <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 24px" }}>
+        {/* Header */}
+        <div style={{ marginBottom: "28px" }}>
+          <h1 style={{ fontSize: "22px", fontWeight: "700", letterSpacing: "-0.02em", marginBottom: "4px" }}>
+            Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, {user.name.split(" ")[0]} 👋
+          </h1>
+          <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+            Working toward <span style={{ color: "#818cf8", fontWeight: "500" }}>{user.goalRole || "your goal"}</span>
+          </p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "20px" }}>
           {[
-            { label: "XP Earned",    value: user.xp,              icon: "⚡", color: "#eab308", bg: "rgba(234,179,8,0.1)",  border: "rgba(234,179,8,0.2)" },
-            { label: "Day Streak",   value: `${user.streak}d`,    icon: "🔥", color: "#f97316", bg: "rgba(249,115,22,0.1)", border: "rgba(249,115,22,0.2)" },
-            { label: "Completed",    value: `${completed}/${total}`, icon: "✅", color: "#22c55e", bg: "rgba(34,197,94,0.1)",  border: "rgba(34,197,94,0.2)" },
-            { label: "In Progress",  value: inProgress,           icon: "🔄", color: "#6366f1", bg: "rgba(99,102,241,0.1)", border: "rgba(99,102,241,0.2)" },
+            { label: "XP Earned", value: user.xp, icon: "⚡", color: "#fbbf24" },
+            { label: "Day Streak", value: `${user.streak}d`, icon: "🔥", color: "#f97316" },
+            { label: "Skills Done", value: `${completed}/${total}`, icon: "✓", color: "#4ade80" },
+            { label: "Remaining", value: missing, icon: "○", color: "#818cf8" },
           ].map(s => (
-            <div key={s.label} className="card text-center" style={{ borderColor: s.border, background: s.bg }}>
-              <div className="text-2xl mb-2">{s.icon}</div>
-              <div className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>
-              <div className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{s.label}</div>
+            <div key={s.label} className="stat-card">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span className="stat-label">{s.label}</span>
+                <span style={{ fontSize: "14px" }}>{s.icon}</span>
+              </div>
+              <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
             </div>
           ))}
         </div>
 
         {/* Progress */}
         {roadmap && (
-          <div className="card mb-6">
-            <div className="flex justify-between items-center mb-3">
+          <div className="card" style={{ marginBottom: "24px", padding: "16px 20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
               <div>
-                <h2 className="font-semibold text-sm">{roadmap.goalRole} — Overall Progress</h2>
-                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{completed} of {total} skills completed · {missing} remaining</p>
+                <span style={{ fontSize: "13px", fontWeight: "600" }}>{roadmap.goalRole}</span>
+                <span style={{ color: "var(--text-muted)", fontSize: "12px", marginLeft: "8px" }}>{completed} of {total} skills verified</span>
               </div>
-              <div className="text-2xl font-bold gradient-text">{percent}%</div>
+              <span style={{ fontSize: "20px", fontWeight: "800", color: "#818cf8" }}>{percent}%</span>
             </div>
-            <div className="progress-bar h-2.5">
-              <div className="progress-fill h-2.5" style={{ width: `${percent}%` }} />
+            <div className="progress-bar" style={{ height: "6px" }}>
+              <div className="progress-fill" style={{ height: "6px", width: `${percent}%` }} />
             </div>
-            {percent < 100 && (
-              <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
-                {percent === 0 ? "🌱 Start by marking skills on your Roadmap page" :
-                 percent < 30 ? "🚀 Great start! Keep the momentum going" :
-                 percent < 70 ? "💪 Past the halfway mark! You're doing great" :
-                 "🔥 Almost there! Finish strong"}
-              </p>
-            )}
           </div>
         )}
 
         {/* Features grid */}
-        <div className="mb-2">
-          <p className="section-title">All Features</p>
+        <div style={{ marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span className="section-label">All Features</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          {features.map(f => (
-            <Link key={f.href} href={f.href} className="feature-card group">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 transition-transform group-hover:scale-110"
-                style={{ background: f.color }}>
-                {f.icon}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))", gap: "8px", marginBottom: "28px" }}>
+          {FEATURES.map(f => (
+            <Link key={f.href} href={f.href} style={{ textDecoration: "none" }}>
+              <div className="feature-card">
+                <div className="feature-icon">{f.icon}</div>
+                <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-primary)" }}>{f.title}</div>
+                <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: "1.4" }}>{f.desc}</div>
               </div>
-              <h3 className="font-semibold text-xs mb-1">{f.title}</h3>
-              <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>{f.desc}</p>
             </Link>
           ))}
         </div>
 
         {/* Suggested Projects */}
         {roadmap && roadmap.projects.length > 0 && (
-          <div>
-            <p className="section-title">Suggested Projects</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {roadmap.projects.map((project, i) => (
-                <div key={i} className="card card-hover">
-                  <div className={`pill mb-3 ${
-                    project.difficulty === "Beginner" ? "pill-green" :
-                    project.difficulty === "Intermediate" ? "pill-yellow" : "pill-red"
-                  }`}>
-                    {project.difficulty === "Beginner" ? "🟢" : project.difficulty === "Intermediate" ? "🟡" : "🔴"} {project.difficulty}
+          <>
+            <p className="section-label" style={{ marginBottom: "12px" }}>Suggested Projects</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
+              {roadmap.projects.map((p, i) => (
+                <div key={i} className="card">
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span className={`badge ${p.difficulty === "Beginner" ? "badge-green" : p.difficulty === "Intermediate" ? "badge-yellow" : "badge-red"}`}>
+                      {p.difficulty}
+                    </span>
                   </div>
-                  <h3 className="font-semibold text-sm mb-2">{project.title}</h3>
-                  <p className="text-xs mb-3 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{project.description}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.techStack?.map(tech => (
-                      <span key={tech} className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "rgba(255,255,255,0.06)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-                        {tech}
-                      </span>
+                  <h3 style={{ fontSize: "13px", fontWeight: "600", marginBottom: "6px" }}>{p.title}</h3>
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "10px", lineHeight: "1.5" }}>{p.description}</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                    {p.techStack?.map(t => (
+                      <span key={t} style={{ fontSize: "10px", padding: "2px 7px", borderRadius: "4px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>{t}</span>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
