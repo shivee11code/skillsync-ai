@@ -417,7 +417,7 @@ export default function ResumePage() {
               ].map(f => (
                 <div key={f.key}>
                   <label className="block text-xs text-slate-400 mb-1">{f.label}</label>
-                  <input className="input-field text-sm" value={(data as Record<string, string>)[f.key] || ""}
+                  <input className="input-field text-sm" value={(data as unknown as Record<string, string>)[f.key] || ""}
                     onChange={e => u(f.key as keyof ResumeData, e.target.value)} placeholder={f.label} />
                 </div>
               ))}

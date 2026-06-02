@@ -3,7 +3,27 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { ROLE_META } from "@/types";
+
+const ROLES = [
+  { icon: "🌐", title: "Full Stack SDE", desc: "React, Node.js, MongoDB" },
+  { icon: "🤖", title: "AI Engineer", desc: "LLMs, PyTorch, LangChain" },
+  { icon: "📊", title: "Data Scientist", desc: "Python, ML, Analytics" },
+  { icon: "🔧", title: "DevOps Engineer", desc: "Docker, K8s, CI/CD" },
+  { icon: "🔒", title: "Cybersecurity", desc: "Pentesting, OWASP, SIEM" },
+  { icon: "☁️", title: "Cloud Engineer", desc: "AWS, Terraform, Serverless" },
+  { icon: "🎨", title: "Frontend Dev", desc: "React, Next.js, Tailwind" },
+  { icon: "⚙️", title: "Backend Dev", desc: "APIs, Databases, System Design" },
+  { icon: "📱", title: "Mobile Dev", desc: "React Native, Expo" },
+];
+
+const FEATURES = [
+  { icon: "🗺️", title: "AI Roadmap", desc: "Personalized skill trees with gap analysis" },
+  { icon: "📝", title: "Skill Quizzes", desc: "Verify knowledge before marking complete" },
+  { icon: "🎤", title: "Mock Interview", desc: "Timed rounds with instant AI feedback" },
+  { icon: "📄", title: "Resume Builder", desc: "3 professional templates, PDF export" },
+  { icon: "📊", title: "Analytics", desc: "XP tracking, streaks, progress charts" },
+  { icon: "🎯", title: "Job Matcher", desc: "Compare your skills against any JD" },
+];
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -14,121 +34,114 @@ export default function Home() {
   }, [user, loading, router]);
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div className="spinner" />
     </div>
   );
 
   return (
-    <div style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
-      {/* Nav */}
-      <nav style={{ borderBottom: "1px solid var(--border)", padding: "0 32px", height: "56px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "rgba(9,9,11,0.9)", backdropFilter: "blur(12px)", zIndex: 50 }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+      {/* Navbar */}
+      <nav style={{ position: "sticky", top: 0, zIndex: 50, height: "52px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", background: "rgba(8,8,15,0.9)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "linear-gradient(135deg, #6366f1, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px" }}>S</div>
-          <span style={{ fontWeight: "700", fontSize: "15px", color: "var(--text-primary)", letterSpacing: "-0.01em" }}>SkillSync AI</span>
+          <div style={{ width: "26px", height: "26px", borderRadius: "7px", background: "linear-gradient(135deg, #6366f1, #a855f7)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "800", fontSize: "13px" }}>S</div>
+          <span style={{ fontWeight: "700", fontSize: "15px", letterSpacing: "-0.01em" }}>SkillSync AI</span>
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
-          <Link href="/login" className="btn-ghost" style={{ fontSize: "13px", padding: "6px 14px" }}>Sign in</Link>
-          <Link href="/register" className="btn-primary" style={{ fontSize: "13px", padding: "6px 14px" }}>Get started</Link>
+          <Link href="/login" className="btn-ghost" style={{ padding: "6px 14px" }}>Sign in</Link>
+          <Link href="/register" className="btn-primary" style={{ padding: "6px 14px" }}>Get started free</Link>
         </div>
       </nav>
 
       {/* Hero */}
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "80px 32px 64px", textAlign: "center" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "var(--accent-muted)", border: "1px solid var(--accent-border)", borderRadius: "20px", padding: "4px 12px", marginBottom: "32px" }}>
-          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#6366f1", display: "inline-block" }} />
-          <span style={{ fontSize: "12px", color: "#818cf8", fontWeight: "500" }}>AI-powered career guidance for 9 tech roles</span>
+      <div style={{ maxWidth: "780px", margin: "0 auto", padding: "80px 24px 64px", textAlign: "center" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 12px", borderRadius: "20px", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", marginBottom: "28px" }}>
+          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#6366f1", display: "inline-block", animation: "pulse 2s infinite" }} />
+          <span style={{ fontSize: "12px", color: "#818cf8", fontWeight: "500" }}>AI-powered career guidance · 9 tech roles</span>
         </div>
 
-        <h1 style={{ fontSize: "clamp(36px, 5vw, 58px)", fontWeight: "800", lineHeight: "1.1", letterSpacing: "-0.03em", color: "var(--text-primary)", marginBottom: "20px" }}>
-          Your personalized path to<br />
-          <span className="gradient-text">your dream tech role</span>
+        <h1 style={{ fontSize: "clamp(32px,5vw,54px)", fontWeight: "800", lineHeight: "1.1", letterSpacing: "-0.03em", marginBottom: "18px" }}>
+          The smartest way to<br />
+          <span className="gradient-text">land your tech role</span>
         </h1>
 
-        <p style={{ fontSize: "17px", color: "var(--text-secondary)", lineHeight: "1.7", maxWidth: "560px", margin: "0 auto 40px" }}>
-          Stop guessing what to learn. Get an AI-generated roadmap, verify skills with quizzes, practice interviews, and track your progress — all in one place.
+        <p style={{ fontSize: "16px", color: "var(--text-2)", lineHeight: "1.8", maxWidth: "500px", margin: "0 auto 36px" }}>
+          Get a personalized skill roadmap, verify learning with quizzes, practice with AI mock interviews, and track every step of your journey.
         </p>
 
-        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/register" className="btn-primary" style={{ padding: "10px 24px", fontSize: "14px", fontWeight: "600" }}>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+          <Link href="/register" className="btn-primary" style={{ padding: "10px 22px", fontSize: "14px", fontWeight: "600" }}>
             Start for free →
           </Link>
-          <Link href="/login" className="btn-ghost" style={{ padding: "10px 24px", fontSize: "14px" }}>
+          <Link href="/login" className="btn-ghost" style={{ padding: "10px 22px", fontSize: "14px" }}>
             Sign in
           </Link>
         </div>
 
-        {/* Stats row */}
-        <div style={{ display: "flex", gap: "32px", justifyContent: "center", marginTop: "56px", flexWrap: "wrap" }}>
-          {[["9", "Career roles"], ["100+", "Skills tracked"], ["50+", "Interview questions"], ["3", "Resume templates"]].map(([v, l]) => (
+        {/* Stats */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "40px", marginTop: "52px", flexWrap: "wrap" }}>
+          {[["9", "Career roles"], ["100+", "Skills mapped"], ["50+", "Interview Qs"], ["3", "Resume templates"]].map(([v, l]) => (
             <div key={l} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "24px", fontWeight: "800", background: "linear-gradient(135deg, #818cf8, #c084fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{v}</div>
-              <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>{l}</div>
+              <div className="gradient-text" style={{ fontSize: "22px", fontWeight: "800" }}>{v}</div>
+              <div style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "2px" }}>{l}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Roles grid */}
-      <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "0 32px 80px" }}>
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <p className="section-label" style={{ marginBottom: "8px" }}>Career Paths</p>
-          <h2 style={{ fontSize: "28px", fontWeight: "700", letterSpacing: "-0.02em", color: "var(--text-primary)" }}>Choose your direction</h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginTop: "8px" }}>9 specialized roadmaps built for today's tech market</p>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "12px" }}>
-          {Object.entries(ROLE_META).map(([role, meta]) => (
-            <Link href="/register" key={role} style={{ textDecoration: "none" }}>
-              <div className="feature-card" style={{ padding: "16px" }}>
-                <div style={{ fontSize: "22px", marginBottom: "4px" }}>{meta.icon}</div>
-                <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-primary)", lineHeight: "1.3" }}>{role}</div>
-                <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: "1.4" }}>{meta.desc}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Features */}
-      <div style={{ borderTop: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
-        <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "64px 32px" }}>
-          <div style={{ textAlign: "center", marginBottom: "40px" }}>
-            <p className="section-label" style={{ marginBottom: "8px" }}>Everything you need</p>
-            <h2 style={{ fontSize: "28px", fontWeight: "700", letterSpacing: "-0.02em" }}>Built for serious learners</h2>
+      {/* Roles */}
+      <div style={{ borderTop: "1px solid var(--border)", background: "var(--bg-2)", padding: "56px 24px" }}>
+        <div style={{ maxWidth: "960px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "36px" }}>
+            <p className="section-label" style={{ marginBottom: "8px" }}>Career paths</p>
+            <h2 style={{ fontSize: "26px", fontWeight: "700", letterSpacing: "-0.02em" }}>Choose your direction</h2>
+            <p style={{ color: "var(--text-2)", fontSize: "13px", marginTop: "6px" }}>9 specialized roadmaps — pick yours and start today</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "12px" }}>
-            {[
-              { icon: "🗺️", title: "AI Roadmap", desc: "Personalized skill trees with gap detection" },
-              { icon: "📝", title: "Skill Quizzes", desc: "Verify knowledge before marking complete" },
-              { icon: "🎯", title: "Mock Interviews", desc: "Role-specific questions with AI scoring" },
-              { icon: "📄", title: "Resume Builder", desc: "3 professional templates, PDF export" },
-              { icon: "📊", title: "Analytics", desc: "Track XP, streaks, and progress charts" },
-              { icon: "🏆", title: "Leaderboard", desc: "Compete with other learners by XP" },
-              { icon: "🐙", title: "GitHub Analyzer", desc: "Analyze any GitHub profile and repos" },
-              { icon: "📅", title: "Study Planner", desc: "Auto-generated weekly study schedule" },
-            ].map(f => (
-              <div key={f.title} className="card" style={{ padding: "16px" }}>
-                <div style={{ fontSize: "20px", marginBottom: "8px" }}>{f.icon}</div>
-                <div style={{ fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>{f.title}</div>
-                <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.5" }}>{f.desc}</div>
-              </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: "10px" }}>
+            {ROLES.map(r => (
+              <Link href="/register" key={r.title} style={{ textDecoration: "none" }}>
+                <div style={{ background: "var(--bg-3)", border: "1px solid var(--border)", borderRadius: "10px", padding: "16px", cursor: "pointer", transition: "all 0.15s" }}
+                  onMouseEnter={e => { const el = e.currentTarget; el.style.borderColor = "rgba(99,102,241,0.3)"; el.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={e => { const el = e.currentTarget; el.style.borderColor = "var(--border)"; el.style.transform = "none"; }}>
+                  <div style={{ fontSize: "20px", marginBottom: "6px" }}>{r.icon}</div>
+                  <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-1)", marginBottom: "2px" }}>{r.title}</div>
+                  <div style={{ fontSize: "11px", color: "var(--text-3)" }}>{r.desc}</div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
       </div>
 
+      {/* Features */}
+      <div style={{ padding: "56px 24px", maxWidth: "960px", margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: "36px" }}>
+          <p className="section-label" style={{ marginBottom: "8px" }}>Platform features</p>
+          <h2 style={{ fontSize: "26px", fontWeight: "700", letterSpacing: "-0.02em" }}>Everything in one place</h2>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "10px" }}>
+          {FEATURES.map(f => (
+            <div key={f.title} className="card" style={{ padding: "18px" }}>
+              <div style={{ fontSize: "22px", marginBottom: "10px" }}>{f.icon}</div>
+              <div style={{ fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>{f.title}</div>
+              <div style={{ fontSize: "12px", color: "var(--text-2)", lineHeight: "1.5" }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* CTA */}
-      <div style={{ borderTop: "1px solid var(--border)", padding: "64px 32px", textAlign: "center" }}>
-        <h2 style={{ fontSize: "28px", fontWeight: "700", letterSpacing: "-0.02em", marginBottom: "12px" }}>Ready to start?</h2>
-        <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginBottom: "28px" }}>Free forever. No credit card required.</p>
-        <Link href="/register" className="btn-primary" style={{ padding: "10px 28px", fontSize: "14px", fontWeight: "600" }}>
-          Create your free account →
+      <div style={{ borderTop: "1px solid var(--border)", padding: "56px 24px", textAlign: "center" }}>
+        <h2 style={{ fontSize: "26px", fontWeight: "700", letterSpacing: "-0.02em", marginBottom: "10px" }}>Ready to build your career?</h2>
+        <p style={{ color: "var(--text-2)", fontSize: "13px", marginBottom: "24px" }}>Free forever. No credit card required.</p>
+        <Link href="/register" className="btn-primary" style={{ padding: "10px 24px", fontSize: "14px", fontWeight: "600" }}>
+          Create free account →
         </Link>
       </div>
 
       {/* Footer */}
-      <div style={{ borderTop: "1px solid var(--border)", padding: "20px 32px", display: "flex", justifyContent: "center" }}>
-        <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>© 2025 SkillSync AI · B.Tech Final Year Project</span>
+      <div style={{ borderTop: "1px solid var(--border)", padding: "18px 28px", textAlign: "center" }}>
+        <span style={{ fontSize: "12px", color: "var(--text-3)" }}>© 2025 SkillSync AI · B.Tech Final Year Project</span>
       </div>
     </div>
   );
