@@ -14,8 +14,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:3000", credentials: true }));
+const allowedOrigins = [
+  process.env.CLIENT_URL || "http://localhost:3000",
+  "http://localhost:3000",
+  "https://skillsync-ai-client.vercel.app",
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
+}));
 app.use(express.json());
+
+app.get("/", (_req, res) => {
+  res.status(200).json({ status: "ok", message: "SkillSync AI Server" });
+});
 
 app.get("/api/health", (_req, res) => {
   res.status(200).json({ status: "ok", message: "SkillSync API is running" });
