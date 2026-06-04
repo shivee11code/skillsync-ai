@@ -65,3 +65,90 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fadeUp { from { opacity:0;transform:translateY(10px); } to { opacity:1;transform:translateY(0); } }
 .animate-fade-up { animation: fadeUp 0.3s ease forwards; }
+
+/* ── Layout ── */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* ── CSS variable aliases ── */
+:root {
+  --bg-primary: var(--bg);
+  --text-primary: var(--text-1);
+  --text-secondary: var(--text-2);
+  --text-muted: var(--text-3);
+}
+
+/* ── Stat cards ── */
+.stat-card {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-top: 6px;
+}
+
+/* ── Feature cards ── */
+.feature-card {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  transition: all 0.15s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.feature-card:hover {
+  border-color: var(--border-2);
+  background: var(--bg-4);
+  transform: translateY(-1px);
+}
+.feature-icon {
+  font-size: 20px;
+  margin-bottom: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: rgba(99,102,241,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Progress bar ── */
+.progress-bar {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-fill {
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+/* ── Badge aliases ── */
+.badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
