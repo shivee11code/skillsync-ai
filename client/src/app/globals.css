@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --bg: #08080f;
@@ -38,96 +36,26 @@ body {
 ::selection { background: rgba(99,102,241,0.2); }
 
 @layer utilities {
-  .card {
-    background: var(--bg-3);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-  }
-  .card-sm {
-    background: var(--bg-3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 16px;
-  }
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: var(--indigo);
-    color: #fff;
-    font-weight: 500;
-    font-size: 13px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-    text-decoration: none;
-  }
+  .card { background: var(--bg-3); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card-sm { background: var(--bg-3); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--indigo); color: #fff; font-weight: 500; font-size: 13px; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; text-decoration: none; }
   .btn-primary:hover { background: var(--indigo-2); }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: transparent;
-    color: var(--text-2);
-    font-weight: 500;
-    font-size: 13px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-    text-decoration: none;
-  }
+  .btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: transparent; color: var(--text-2); font-weight: 500; font-size: 13px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; white-space: nowrap; text-decoration: none; }
   .btn-ghost:hover { background: rgba(255,255,255,0.04); color: var(--text-1); border-color: var(--border-2); }
   .btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .input-field {
-    width: 100%;
-    background: var(--bg-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 12px;
-    color: var(--text-1);
-    font-size: 13px;
-    outline: none;
-    transition: all 0.15s;
-  }
+  .input-field { width: 100%; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text-1); font-size: 13px; outline: none; transition: all 0.15s; }
   .input-field::placeholder { color: var(--text-3); }
   .input-field:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
-
-  .gradient-text {
-    background: linear-gradient(135deg, var(--indigo-2), var(--purple));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .nav-link {
-    font-size: 13px;
-    color: var(--text-2);
-    text-decoration: none;
-    padding: 5px 10px;
-    border-radius: 6px;
-    transition: all 0.15s;
-  }
+  .gradient-text { background: linear-gradient(135deg, var(--indigo-2), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .nav-link { font-size: 13px; color: var(--text-2); text-decoration: none; padding: 5px 10px; border-radius: 6px; transition: all 0.15s; }
   .nav-link:hover { color: var(--text-1); background: rgba(255,255,255,0.05); }
-
   .badge-green  { display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.2); }
   .badge-yellow { display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:rgba(245,158,11,0.1);color:#fbbf24;border:1px solid rgba(245,158,11,0.2); }
   .badge-red    { display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2); }
   .badge-indigo { display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:rgba(99,102,241,0.1);color:#818cf8;border:1px solid rgba(99,102,241,0.2); }
   .badge-slate  { display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:rgba(100,116,139,0.1);color:#94a3b8;border:1px solid rgba(100,116,139,0.2); }
-
   .spinner { width:18px;height:18px;border:2px solid rgba(99,102,241,0.2);border-top-color:#6366f1;border-radius:50%;animation:spin 0.7s linear infinite; }
   .section-label { font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3); }
 }
