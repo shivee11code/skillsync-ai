@@ -21,7 +21,6 @@ const FEATURES = [
   { href: "/analytics",      icon: "📊", title: "Analytics",          desc: "Progress charts & XP" },
   { href: "/studyplan",      icon: "📅", title: "Study Plan",         desc: "AI day-by-day schedule" },
   { href: "/jobmatch",       icon: "🎯", title: "Job Match",          desc: "Compare skills vs JD" },
-  { href: "/codereview",     icon: "🔍", title: "Code Review",        desc: "AI code feedback" },
   { href: "/leaderboard",    icon: "🏆", title: "Leaderboard",        desc: "XP rankings" },
   { href: "/resume",         icon: "📄", title: "Resume Builder",     desc: "Download PDF resume" },
   { href: "/github",         icon: "🐙", title: "GitHub Analyzer",    desc: "Analyze any profile" },
