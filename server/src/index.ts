@@ -18,6 +18,7 @@ const allowedOrigins = [
   process.env.CLIENT_URL || "http://localhost:3000",
   "http://localhost:3000",
   "https://skillsync-ai-client.vercel.app",
+  "https://client-pied-ten-27.vercel.app",
 ];
 app.use(cors({
   origin: (origin, callback) => {
