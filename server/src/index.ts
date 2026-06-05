@@ -9,6 +9,7 @@ import quizRoutes from "./routes/quiz";
 import interviewRoutes from "./routes/interview";
 import githubRoutes from "./routes/github";
 import leaderboardRoutes from "./routes/leaderboard";
+import analyticsRoutes from "./routes/analytics";
 
 dotenv.config();
 const app = express();
@@ -45,6 +46,7 @@ app.use("/api/quiz", quizRoutes);
 app.use("/api/interview", interviewRoutes);
 app.use("/api/github", githubRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.use((_req, res) => { res.status(404).json({ message: "Route not found" }); });
 
