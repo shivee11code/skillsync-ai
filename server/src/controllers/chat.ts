@@ -2,9 +2,9 @@ import { Response } from "express";
 import User from "../models/User";
 import Roadmap from "../models/Roadmap";
 import { AuthRequest } from "../middleware/auth";
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export const chat = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -30,8 +30,8 @@ In progress skills: ${inProgressSkills.join(", ") || "none"}.
 Remaining skills: ${missingSkills.join(", ") || "none"}.
 Give concise, practical, personalized advice. Use emojis sparingly. Keep responses under 200 words.`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+    const completion = await groq.chat.completions.create({
+      model: "llama3-8b-8192",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: message }
