@@ -12,8 +12,7 @@ const STATUS = {
   missing:    { label: "Not Started", dot: "#475569", bg: "rgba(71,85,105,0.1)",   border: "rgba(71,85,105,0.2)",    text: "#94a3b8" },
 };
 
-const nextStatus = (s: SkillNode["status"]): SkillNode["status"] =>
-  s === "missing" ? "inProgress" : s === "inProgress" ? "completed" : "missing";
+interface QuizQuestion { q: string; options: string[]; }
 
 export default function RoadmapPage() {
   const { user, loading: authLoading } = useAuth();
@@ -22,6 +21,13 @@ export default function RoadmapPage() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "missing" | "inProgress" | "completed">("all");
+
+  // Quiz modal state
+  const [quizSkill, setQuizSkill] = useState<SkillNode | null>(null);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [quizAnswers, setQuizAnswers] = useState<number[]>([]);
+  const [quizResult, setQuizResult] = useState<{ score: number; passed: boolean; message: string } | null>(null);
+  const [quizLoading, setQuizLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
@@ -37,15 +43,57 @@ export default function RoadmapPage() {
 
   const handleToggle = async (skill: SkillNode) => {
     if (!roadmap || updating) return;
+    // If going to completed, show quiz first
+    if (skill.status === "inProgress") {
+      setQuizLoading(true);
+      setQuizSkill(skill);
+      setQuizAnswers([]);
+      setQuizResult(null);
+      try {
+        const data = await api.get<{ questions: QuizQuestion[] }>(`/api/quiz/${encodeURIComponent(skill.skillName)}`);
+        setQuizQuestions(data.questions);
+      } catch { setQuizQuestions([]); }
+      setQuizLoading(false);
+      return;
+    }
+    // Otherwise toggle normally
     setUpdating(skill.skillName);
     try {
+      const newStatus = skill.status === "missing" ? "inProgress" : "missing";
       const data = await api.put<{ roadmap: Roadmap }>(
         `/api/roadmap/skill/${encodeURIComponent(skill.skillName)}`,
-        { status: nextStatus(skill.status) }
+        { status: newStatus }
       );
       setRoadmap(data.roadmap);
     } catch (err) { console.error(err); }
     finally { setUpdating(null); }
+  };
+
+  const handleQuizSubmit = async () => {
+    if (!quizSkill || quizAnswers.length !== quizQuestions.length) return;
+    setQuizLoading(true);
+    try {
+      const result = await api.post<{ score: number; passed: boolean; message: string }>(
+        `/api/quiz/${encodeURIComponent(quizSkill.skillName)}/submit`,
+        { answers: quizAnswers }
+      );
+      setQuizResult(result);
+      if (result.passed) {
+        const data = await api.put<{ roadmap: Roadmap }>(
+          `/api/roadmap/skill/${encodeURIComponent(quizSkill.skillName)}`,
+          { status: "completed" }
+        );
+        setRoadmap(data.roadmap);
+      }
+    } catch (err) { console.error(err); }
+    finally { setQuizLoading(false); }
+  };
+
+  const closeQuiz = () => {
+    setQuizSkill(null);
+    setQuizQuestions([]);
+    setQuizAnswers([]);
+    setQuizResult(null);
   };
 
   if (authLoading || loading) return (
@@ -80,7 +128,6 @@ export default function RoadmapPage() {
       </nav>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold mb-1">{roadmap.goalRole}</h1>
@@ -91,12 +138,10 @@ export default function RoadmapPage() {
           <div className="text-3xl font-bold gradient-text">{percent}%</div>
         </div>
 
-        {/* Progress */}
         <div className="progress-bar h-2 mb-8">
           <div className="progress-fill h-2" style={{ width: `${percent}%` }} />
         </div>
 
-        {/* Filter tabs */}
         <div className="flex gap-2 mb-6 flex-wrap">
           {(["all", "missing", "inProgress", "completed"] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
@@ -117,9 +162,8 @@ export default function RoadmapPage() {
           </span>
         </div>
 
-        {/* Skills grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {filtered.map((skill, i) => {
+          {filtered.map((skill) => {
             const cfg = STATUS[skill.status];
             const isUpdating = updating === skill.skillName;
             return (
@@ -141,6 +185,9 @@ export default function RoadmapPage() {
                         {cfg.label}
                       </span>
                       <span className="text-xs" style={{ color: "var(--text-muted)" }}>~{skill.estimatedWeeks}w</span>
+                      {skill.status === "inProgress" && (
+                        <span className="text-xs text-indigo-400">🎯 Click to take quiz</span>
+                      )}
                     </div>
                   </div>
                   <div className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" style={{ background: cfg.dot }} />
@@ -167,10 +214,95 @@ export default function RoadmapPage() {
 
         <div className="card mt-6 py-3" style={{ background: "rgba(99,102,241,0.05)", borderColor: "rgba(99,102,241,0.2)" }}>
           <p className="text-xs text-center" style={{ color: "var(--text-secondary)" }}>
-            <span className="text-indigo-400 font-medium">Tip:</span> Click any skill → Not Started → In Progress → Completed. Each completion earns <span className="text-yellow-400 font-medium">+10 XP</span>
+            <span className="text-indigo-400 font-medium">Tip:</span> Not Started → In Progress → Pass Quiz → Completed ✅ Each completion earns <span className="text-yellow-400 font-medium">+10 XP</span>
           </p>
         </div>
       </div>
+
+      {/* Quiz Modal */}
+      {quizSkill && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)" }}>
+          <div className="card w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            style={{ background: "var(--card)", border: "1px solid rgba(99,102,241,0.3)" }}>
+
+            {quizLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+
+            {!quizLoading && !quizResult && quizQuestions.length > 0 && (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-lg font-bold">🎯 Skill Verification Quiz</h2>
+                    <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+                      {quizSkill.skillName} — Score 60% or more to mark as completed
+                    </p>
+                  </div>
+                  <button onClick={closeQuiz} className="text-xl" style={{ color: "var(--text-muted)" }}>✕</button>
+                </div>
+
+                <div className="space-y-6">
+                  {quizQuestions.map((q, qi) => (
+                    <div key={qi} className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)" }}>
+                      <p className="text-sm font-medium mb-3">
+                        <span className="text-indigo-400 mr-2">Q{qi + 1}.</span>{q.q}
+                      </p>
+                      <div className="grid grid-cols-1 gap-2">
+                        {q.options.map((opt, oi) => (
+                          <button key={oi} onClick={() => {
+                            const a = [...quizAnswers];
+                            a[qi] = oi;
+                            setQuizAnswers(a);
+                          }}
+                            className="text-left px-4 py-2.5 rounded-lg text-sm transition-all"
+                            style={{
+                              background: quizAnswers[qi] === oi ? "rgba(99,102,241,0.2)" : "rgba(255,255,255,0.03)",
+                              border: quizAnswers[qi] === oi ? "1px solid rgba(99,102,241,0.5)" : "1px solid var(--border)",
+                              color: quizAnswers[qi] === oi ? "#a5b4fc" : "var(--text-secondary)"
+                            }}>
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button onClick={handleQuizSubmit}
+                  disabled={quizAnswers.length !== quizQuestions.length || quizAnswers.some(a => a === undefined)}
+                  className="btn-primary w-full mt-6"
+                  style={{ opacity: quizAnswers.length !== quizQuestions.length ? 0.5 : 1 }}>
+                  Submit Quiz
+                </button>
+              </>
+            )}
+
+            {!quizLoading && quizResult && (
+              <div className="text-center py-6">
+                <div className="text-5xl mb-4">{quizResult.passed ? "🎉" : "😔"}</div>
+                <h2 className="text-xl font-bold mb-2">
+                  {quizResult.passed ? "Quiz Passed!" : "Quiz Failed"}
+                </h2>
+                <p className="text-3xl font-bold mb-2" style={{ color: quizResult.passed ? "#22c55e" : "#ef4444" }}>
+                  {quizResult.score}%
+                </p>
+                <p className="text-sm mb-6" style={{ color: "var(--text-secondary)" }}>{quizResult.message}</p>
+                {quizResult.passed ? (
+                  <button onClick={closeQuiz} className="btn-primary">Continue Learning 🚀</button>
+                ) : (
+                  <div className="flex gap-3 justify-center">
+                    <button onClick={() => { setQuizResult(null); setQuizAnswers([]); }} className="btn-primary">Try Again</button>
+                    <button onClick={closeQuiz} className="px-4 py-2 rounded-xl text-sm" style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}>Study More</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
