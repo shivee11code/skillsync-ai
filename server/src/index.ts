@@ -47,6 +47,8 @@ app.use("/api/interview", interviewRoutes);
 app.use("/api/github", githubRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
+import studyplanRoutes from "./routes/studyplan";
+app.use("/api/studyplan", studyplanRoutes);
 
 app.use((_req, res) => { res.status(404).json({ message: "Route not found" }); });
 
