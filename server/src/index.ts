@@ -49,6 +49,8 @@ app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
 import studyplanRoutes from "./routes/studyplan";
 app.use("/api/studyplan", studyplanRoutes);
+import jobmatchRoutes from "./routes/jobmatch";
+app.use("/api/jobmatch", jobmatchRoutes);
 
 app.use((_req, res) => { res.status(404).json({ message: "Route not found" }); });
 
